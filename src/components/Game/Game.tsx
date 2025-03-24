@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import Maps from "./components/Maps/Maps";
-import Player from "./components/Player/Player.tsx/Player";
+import Player from "./components/Player/Player";
 import { PointerLockControls } from "@react-three/drei";
 
 const Game: React.FC = () => {
