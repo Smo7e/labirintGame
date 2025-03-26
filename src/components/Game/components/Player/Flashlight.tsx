@@ -5,7 +5,10 @@ import { SpotLight, Vector3 } from "three";
 const Flashlight = () => {
     const spotLightRef = useRef<SpotLight>(null);
     const { camera, pointer, raycaster, scene } = useThree();
-    let lastPosition = new Vector3(0, 0, 0);
+    const lastPosition = useRef(new Vector3());
+    const lightPosition = useRef(new Vector3());
+    const lightTargetPosition = useRef(new Vector3());
+    const lerpFactor = 0.1;
 
     useFrame(() => {
         if (!spotLightRef.current) return;
@@ -13,16 +16,20 @@ const Flashlight = () => {
         raycaster.setFromCamera(pointer, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
         let targetPosition = new Vector3();
+
         if (intersects.length > 0) {
-            targetPosition = intersects[0].point;
-            lastPosition = targetPosition;
+            targetPosition.copy(intersects[0].point);
+            lastPosition.current.copy(targetPosition);
         } else {
-            targetPosition = lastPosition;
+            targetPosition.copy(lastPosition.current);
         }
 
-        spotLightRef.current.position.copy(camera.position);
+        lightPosition.current.copy(camera.position);
+        spotLightRef.current.position.lerp(lightPosition.current, lerpFactor);
 
-        spotLightRef.current.target.position.copy(targetPosition);
+        lightTargetPosition.current.copy(targetPosition);
+        spotLightRef.current.target.position.lerp(lightTargetPosition.current, lerpFactor);
+
         spotLightRef.current.target.updateMatrixWorld();
     });
 
