@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Game from "./components/Game/Game";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
@@ -11,11 +10,11 @@ function App() {
         <>
             <header></header>
             <main style={{ height: "100%" }}>
-                <Leaderboard />
+                {/* <Leaderboard /> */}
                 <Routes>
                     <Route path="/" element={<Menu />} />
                     <Route path="/Game" element={<Game />} />
-                    <Route path="/Tables" element={<></>} />
+                    <Route path="/Tables" element={<Leaderboard />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>

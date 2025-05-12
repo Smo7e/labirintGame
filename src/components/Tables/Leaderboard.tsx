@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 type LeaderboardEntry = {
     name: string;
     time: number;
-    date: string;
 };
-const openDB = async (): Promise<IDBDatabase> => {
+const openDB = async (numberTable: number): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("leaderboardDB", 1);
         console.log(request);
 
         request.onupgradeneeded = (e) => {
             const db = (e.target as IDBRequest).result;
-            if (!db.objectStoreNames.contains("leaderboard")) {
-                const store = db.createObjectStore("leaderboard", { autoIncrement: true });
+            if (!db.objectStoreNames.contains("leaderboard" + numberTable)) {
+                const store = db.createObjectStore("leaderboard" + numberTable, { autoIncrement: true });
                 store.createIndex("timeIndex", "time");
             }
         };
@@ -27,17 +27,16 @@ const openDB = async (): Promise<IDBDatabase> => {
         };
     });
 };
-export const saveToLeaderboard = async (time: number, name: string) => {
+export const saveToLeaderboard = async (time: number, name: string, numberTable = 0) => {
     const newEntry: LeaderboardEntry = {
         name,
         time,
-        date: new Date().toISOString(),
     };
 
-    const db = await openDB();
+    const db = await openDB(numberTable);
 
-    const transaction = db.transaction("leaderboard", "readwrite");
-    const store = transaction.objectStore("leaderboard");
+    const transaction = db.transaction("leaderboard" + numberTable, "readwrite");
+    const store = transaction.objectStore("leaderboard" + numberTable);
 
     store.add(newEntry);
 
@@ -63,8 +62,8 @@ export const saveToLeaderboard = async (time: number, name: string) => {
     });
 };
 
-export const getLeaderboard = async (nameDB: string): Promise<LeaderboardEntry[]> => {
-    const db = await openDB();
+export const getLeaderboard = async (nameDB: string, numberTable: number): Promise<LeaderboardEntry[]> => {
+    const db = await openDB(numberTable);
     const transaction = db.transaction(nameDB, "readonly");
     const store = transaction.objectStore(nameDB);
 
@@ -80,18 +79,23 @@ export const getLeaderboard = async (nameDB: string): Promise<LeaderboardEntry[]
 };
 
 const Leaderboard: React.FC = () => {
-    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [leaderboard0, setLeaderboard0] = useState<LeaderboardEntry[]>([]);
+    const [leaderboard1, setLeaderboard1] = useState<LeaderboardEntry[]>([]);
+    const [leaderboard2, setLeaderboard2] = useState<LeaderboardEntry[]>([]);
 
-    const clearLeaderboard = async () => {
+    const clearLeaderboard = async (numberTable: number) => {
         const password = prompt("Введите пароль для удаления данных: ");
         if (password === "Password") {
-            const db = await openDB();
-            const transaction = db.transaction("leaderboard", "readwrite");
-            const store = transaction.objectStore("leaderboard");
+            const db = await openDB(numberTable);
+            const transaction = db.transaction("leaderboard" + numberTable, "readwrite");
+            const store = transaction.objectStore("leaderboard" + numberTable);
             store.clear();
 
             transaction.oncomplete = () => {
-                setLeaderboard([]);
+                setLeaderboard0([]);
+                setLeaderboard1([]);
+                setLeaderboard2([]);
+
                 alert("Таблица лидеров очищена!");
             };
             transaction.onerror = () => {
@@ -103,50 +107,63 @@ const Leaderboard: React.FC = () => {
     };
     useEffect(() => {
         const fetchLeaderboard = async () => {
-            const data = await getLeaderboard("leaderboard");
-            console.log(data);
-            setLeaderboard(data);
+            const data0 = await getLeaderboard("leaderboard", 0);
+            const data1 = await getLeaderboard("leaderboard", 1);
+            const data2 = await getLeaderboard("leaderboard", 2);
+
+            setLeaderboard0(data0);
+            setLeaderboard1(data1);
+            setLeaderboard2(data2);
         };
 
         fetchLeaderboard();
     }, []);
 
+    const leaderboardJsx = (numberTable: number) => {
+        console.log(leaderboard0, leaderboard1, leaderboard2);
+        return (
+            <div className="leaderboard">
+                <div style={{ width: "100%", textAlign: "center", fontSize: "3vw" }}>Таблица лидеров</div>
+                <table style={{ width: "100%", textAlign: "center" }}>
+                    <thead>
+                        <tr style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}>
+                            <th>№</th>
+                            <th>Имя</th>
+                            <th>Время (сек)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {[leaderboard0, leaderboard1, leaderboard2][numberTable].map((entry, index) => (
+                            <tr
+                                key={index}
+                                style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}
+                            >
+                                <td>{index + 1}</td>
+                                <td>{entry.name}</td>
+                                <td>{entry.time}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
     return (
         <>
-            <div style={{ display: "flex", height: "80vh", width: "80vw" }}>
-                <div className="leaderboard">
-                    <div style={{ width: "100%", textAlign: "center", fontSize: "3vw" }}>Таблица лидеров</div>
-                    <table style={{ width: "100%", textAlign: "center" }}>
-                        <thead>
-                            <tr style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}>
-                                <th>№</th>
-                                <th>Имя</th>
-                                <th>Время (сек)</th>
-                                <th>Ходы</th>
-                                <th>Дата</th>
-                            </tr>
-                        </thead>
+            <div style={{ display: "flex", height: "80vh", width: "80vw" }}>{leaderboardJsx(2)}</div>
 
-                        <tbody>
-                            {leaderboard.map((entry, index) => (
-                                <tr
-                                    key={index}
-                                    style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}
-                                >
-                                    <td>{index + 1}</td>
-                                    <td>{entry.name}</td>
-                                    <td>{entry.time}</td>
-                                    <td>{new Date(entry.date).toLocaleDateString()}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <button style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)" }} onClick={clearLeaderboard}>
+            <button
+                style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)" }}
+                onClick={() => {
+                    clearLeaderboard(0);
+                    clearLeaderboard(1);
+                    clearLeaderboard(2);
+                }}
+            >
                 Очистить таблицу
             </button>
+            <Link to="/">Меню</Link>
         </>
     );
 };

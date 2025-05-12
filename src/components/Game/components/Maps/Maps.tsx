@@ -1,7 +1,7 @@
 import { RigidBody } from "@react-three/rapier";
 import { SIZE_MAP } from "../..";
 import React, { useEffect, useRef, useState } from "react";
-import { Box3, Mesh } from "three";
+import { Box3, DoubleSide, Mesh } from "three";
 import { generateMaze } from "./generateMaze";
 import { useThree } from "@react-three/fiber";
 
@@ -43,7 +43,7 @@ const Maps: React.FC<{ winFunc: Function }> = ({ winFunc }) => {
 
     return (
         <>
-            {/* <fogExp2 attach="fog" args={["#808080", 0.08]} /> */}
+            <fogExp2 attach="fog" args={["#808080", 0.08]} />
             <RigidBody
                 lockTranslations
                 lockRotations
@@ -54,7 +54,7 @@ const Maps: React.FC<{ winFunc: Function }> = ({ winFunc }) => {
                     <meshStandardMaterial color="gray" />
                 </mesh>
             </RigidBody>
-            {/* <RigidBody
+            <RigidBody
                 lockTranslations
                 lockRotations
                 position={[(ROW / 2) * SIZE_MAP, SIZE_MAP * 1.5, (COL / 2) * SIZE_MAP]}
@@ -63,10 +63,10 @@ const Maps: React.FC<{ winFunc: Function }> = ({ winFunc }) => {
                     <planeGeometry args={[(ROW + 2) * SIZE_MAP, (COL + 5) * SIZE_MAP]} />
                     <meshStandardMaterial color="gray" side={DoubleSide} />
                 </mesh>
-            </RigidBody> */}
+            </RigidBody>
 
             <mesh
-                position={[SIZE_MAP * COL - SIZE_MAP * 2, SIZE_MAP * 5, SIZE_MAP * ROW + SIZE_MAP * 2]}
+                position={[SIZE_MAP * COL - SIZE_MAP * 2, SIZE_MAP, SIZE_MAP * ROW + SIZE_MAP * 2]}
                 ref={boxRef}
                 name="win"
             >
