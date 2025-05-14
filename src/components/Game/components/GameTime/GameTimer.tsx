@@ -21,16 +21,16 @@ const GameTimer = forwardRef((_, ref) => {
         };
     }, [startTime]);
 
-    const formatTime = (timeInMs: number) => {
-        const totalSeconds = Math.floor(timeInMs / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+    // const formatTime = (timeInMs: number) => {
+    //     const totalSeconds = Math.floor(timeInMs / 1000);
+    //     const hours = Math.floor(totalSeconds / 3600);
+    //     const minutes = Math.floor((totalSeconds % 3600) / 60);
+    //     const seconds = totalSeconds % 60;
 
-        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`;
-    };
+    //     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+    //         .toString()
+    //         .padStart(2, "0")}`;
+    // };
 
     const getTime = (): number => {
         return elapsedTime / 1000;
@@ -46,7 +46,7 @@ const GameTimer = forwardRef((_, ref) => {
     }));
     return (
         <div style={{ position: "fixed", color: "white", zIndex: 10 }} className="noselect">
-            <p>Time: {formatTime(elapsedTime)}</p>
+            {/* <p>Time: {formatTime(elapsedTime)}</p> */}
         </div>
     );
 });

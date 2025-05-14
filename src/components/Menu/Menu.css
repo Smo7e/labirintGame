@@ -1,0 +1,40 @@
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh; /* Занимает всю высоту экрана */
+    text-align: center;
+}
+
+.menu-link {
+    display: block;
+    margin-bottom: 20px; /* Отступ между ссылками */
+    padding: 15px 30px; /* Увеличим кнопки */
+    background-color: #4caf50; /* Зеленый цвет кнопок */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px; /* Скругленные углы */
+    font-size: 1.2rem; /* Увеличим размер шрифта */
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Плавное изменение цвета при наведении */
+}
+
+.menu-link:hover {
+    background-color: #3e8e41; /* Затемнение при наведении */
+}
+
+.menu-link:last-child {
+    margin-bottom: 0; /* Убираем отступ у последней ссылки */
+}
+
+@media (max-width: 768px) {
+    /* Для небольших экранов */
+    .menu-container {
+        padding: 10px;
+    }
+    .menu-link {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}

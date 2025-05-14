@@ -2,8 +2,13 @@
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     height: 100%;
     width: 100%;
+    min-width: 100%;
+    min-height: 100%;
 }
-
+@font-face {
+    font-family: blood;
+    src: url("./assets/BloodyTerror-GOW9Z.ttf");
+}
 a {
     font-weight: 500;
     color: #646cff;

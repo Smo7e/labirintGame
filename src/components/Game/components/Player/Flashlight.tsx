@@ -37,8 +37,8 @@ const Flashlight = () => {
         <spotLight
             ref={spotLightRef}
             color="white"
-            intensity={2}
-            angle={0.6}
+            intensity={150}
+            angle={0.5}
             penumbra={1}
             distance={100}
             decay={0.1}

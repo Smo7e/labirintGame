@@ -6,7 +6,7 @@ import { usePlayerMovement } from "../hooks/usePlayerMovement.js";
 import { SIZE_MAP } from "../../index.js";
 import Flashlight from "./Flashlight.js";
 
-const MOVE_SPEED = 20;
+const MOVE_SPEED = 10;
 const direction: Vector3 = new THREE.Vector3();
 const frontVector: Vector3 = new THREE.Vector3();
 const sideVector: Vector3 = new THREE.Vector3();
@@ -38,7 +38,7 @@ const Player = () => {
             <Flashlight />
             <RigidBody position={[SIZE_MAP, SIZE_MAP, SIZE_MAP]} ref={playerRef} type="dynamic" name="rigidPlayer">
                 <mesh ref={boxPlayerRef} rotation={[0, 0, Math.PI * 2]} name="player">
-                    <capsuleGeometry args={[1, 1]} />
+                    <capsuleGeometry args={[2, 2]} />
                     <meshStandardMaterial visible={true} />
                 </mesh>
             </RigidBody>

@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
+import "./Leaderboard.css";
 import { Link } from "react-router-dom";
-
 type LeaderboardEntry = {
     name: string;
     time: number;
 };
-const openDB = async (numberTable: number): Promise<IDBDatabase> => {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open("leaderboardDB", 1);
-        console.log(request);
+interface LeaderboardProps {
+    titles?: string[];
+}
 
+const DB_NAME = "leaderboardDB";
+const DB_VERSION = 2;
+const TABLE_NAMES = ["leaderboardTable1", "leaderboardTable2", "leaderboardTable3"];
+
+const openDB = async (): Promise<IDBDatabase> => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = (e) => {
-            const db = (e.target as IDBRequest).result;
-            if (!db.objectStoreNames.contains("leaderboard" + numberTable)) {
-                const store = db.createObjectStore("leaderboard" + numberTable, { autoIncrement: true });
-                store.createIndex("timeIndex", "time");
+            const db = (e.target as IDBRequest).result as IDBDatabase;
+
+            for (const tableName of TABLE_NAMES) {
+                if (!db.objectStoreNames.contains(tableName)) {
+                    const store = db.createObjectStore(tableName, { autoIncrement: true });
+                    store.createIndex("timeIndex", "time");
+                }
             }
         };
 
@@ -27,16 +36,22 @@ const openDB = async (numberTable: number): Promise<IDBDatabase> => {
         };
     });
 };
-export const saveToLeaderboard = async (time: number, name: string, numberTable = 0) => {
+
+export const saveToLeaderboard = async (time: number, name: string, tableIndex: number = 0) => {
+    if (tableIndex < 0 || tableIndex >= TABLE_NAMES.length) {
+        throw new Error("Invalid table index" + (TABLE_NAMES.length - 1));
+    }
+    const tableName = TABLE_NAMES[tableIndex];
+
     const newEntry: LeaderboardEntry = {
         name,
         time,
     };
 
-    const db = await openDB(numberTable);
+    const db = await openDB();
 
-    const transaction = db.transaction("leaderboard" + numberTable, "readwrite");
-    const store = transaction.objectStore("leaderboard" + numberTable);
+    const transaction = db.transaction(tableName, "readwrite");
+    const store = transaction.objectStore(tableName);
 
     store.add(newEntry);
 
@@ -62,15 +77,21 @@ export const saveToLeaderboard = async (time: number, name: string, numberTable 
     });
 };
 
-export const getLeaderboard = async (nameDB: string, numberTable: number): Promise<LeaderboardEntry[]> => {
-    const db = await openDB(numberTable);
-    const transaction = db.transaction(nameDB, "readonly");
-    const store = transaction.objectStore(nameDB);
+export const getLeaderboard = async (tableIndex: number = 0): Promise<LeaderboardEntry[]> => {
+    if (tableIndex < 0 || tableIndex >= TABLE_NAMES.length) {
+        throw new Error("Invalid table index." + (TABLE_NAMES.length - 1));
+    }
+    const tableName = TABLE_NAMES[tableIndex];
+    const db = await openDB();
+    const transaction = db.transaction(tableName, "readonly");
+    const store = transaction.objectStore(tableName);
 
     return new Promise((resolve, reject) => {
         const request = store.getAll();
         request.onsuccess = () => {
-            resolve(request.result as LeaderboardEntry[]);
+            const results = request.result as LeaderboardEntry[];
+            results.sort((a, b) => a.time - b.time);
+            resolve(results);
         };
         request.onerror = () => {
             reject("Failed to retrieve leaderboard");
@@ -78,93 +99,65 @@ export const getLeaderboard = async (nameDB: string, numberTable: number): Promi
     });
 };
 
-const Leaderboard: React.FC = () => {
-    const [leaderboard0, setLeaderboard0] = useState<LeaderboardEntry[]>([]);
-    const [leaderboard1, setLeaderboard1] = useState<LeaderboardEntry[]>([]);
-    const [leaderboard2, setLeaderboard2] = useState<LeaderboardEntry[]>([]);
+const Leaderboard: React.FC<LeaderboardProps> = ({ titles }) => {
+    const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[][]>([[], [], []]);
+    const numberOfTables = 3;
 
-    const clearLeaderboard = async (numberTable: number) => {
-        const password = prompt("Введите пароль для удаления данных: ");
-        if (password === "Password") {
-            const db = await openDB(numberTable);
-            const transaction = db.transaction("leaderboard" + numberTable, "readwrite");
-            const store = transaction.objectStore("leaderboard" + numberTable);
-            store.clear();
-
-            transaction.oncomplete = () => {
-                setLeaderboard0([]);
-                setLeaderboard1([]);
-                setLeaderboard2([]);
-
-                alert("Таблица лидеров очищена!");
-            };
-            transaction.onerror = () => {
-                alert("Произошла ошибка при очистке данных.");
-            };
-        } else {
-            alert("Неверный пароль!");
-        }
-    };
     useEffect(() => {
-        const fetchLeaderboard = async () => {
-            const data0 = await getLeaderboard("leaderboard", 0);
-            const data1 = await getLeaderboard("leaderboard", 1);
-            const data2 = await getLeaderboard("leaderboard", 2);
-
-            setLeaderboard0(data0);
-            setLeaderboard1(data1);
-            setLeaderboard2(data2);
+        const loadLeaderboards = async () => {
+            const allLeaderboards: LeaderboardEntry[][] = [];
+            for (let i = 0; i < numberOfTables; i++) {
+                try {
+                    const lb = await getLeaderboard(i);
+                    allLeaderboards.push(lb);
+                } catch (error) {
+                    console.error(`Failed to load leaderboard ${i + 1}:`, error);
+                    allLeaderboards.push([]);
+                }
+            }
+            setLeaderboardData(allLeaderboards);
         };
 
-        fetchLeaderboard();
+        loadLeaderboards();
     }, []);
 
-    const leaderboardJsx = (numberTable: number) => {
-        console.log(leaderboard0, leaderboard1, leaderboard2);
-        return (
-            <div className="leaderboard">
-                <div style={{ width: "100%", textAlign: "center", fontSize: "3vw" }}>Таблица лидеров</div>
-                <table style={{ width: "100%", textAlign: "center" }}>
-                    <thead>
-                        <tr style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}>
-                            <th>№</th>
-                            <th>Имя</th>
-                            <th>Время (сек)</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {[leaderboard0, leaderboard1, leaderboard2][numberTable].map((entry, index) => (
-                            <tr
-                                key={index}
-                                style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)", width: "100%" }}
-                            >
-                                <td>{index + 1}</td>
-                                <td>{entry.name}</td>
-                                <td>{entry.time}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        );
-    };
     return (
-        <>
-            <div style={{ display: "flex", height: "80vh", width: "80vw" }}>{leaderboardJsx(2)}</div>
+        <div>
+            <Link to="/" className="leaderboard-go-menu scary-button">
+                Меню
+            </Link>
 
-            <button
-                style={{ fontSize: "min(2vw, 3vh)", height: "min(6.5vh, 6.5vw)" }}
-                onClick={() => {
-                    clearLeaderboard(0);
-                    clearLeaderboard(1);
-                    clearLeaderboard(2);
-                }}
-            >
-                Очистить таблицу
-            </button>
-            <Link to="/">Меню</Link>
-        </>
+            <div className="leaderboard-container">
+                {[0, 1, 2].map((tableIndex) => (
+                    <div key={tableIndex} className="leaderboard">
+                        <div className="leaderboard-title">
+                            {titles && titles[tableIndex]
+                                ? titles[tableIndex]
+                                : ` ${tableIndex === 0 ? "Легкая" : tableIndex === 1 ? "Средняя" : "Сложная"} `}
+                        </div>
+                        <table className="leaderboard-table">
+                            <thead>
+                                <tr className="leaderboard-header-row">
+                                    <th>№</th>
+                                    <th>Имя</th>
+                                    <th>Время (сек)</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {leaderboardData[tableIndex].map((entry, index) => (
+                                    <tr key={index} className="leaderboard-data-row">
+                                        <td>{index + 1}</td>
+                                        <td>{entry.name}</td>
+                                        <td>{entry.time}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
 

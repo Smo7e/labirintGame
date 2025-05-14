@@ -46,16 +46,21 @@ export const generateMaze = (rows: number, cols: number, seed: number = 1): numb
 
     carvePath(startRow, startCol);
 
+    // maze[rows + 1][cols - 2] = 2;
+
+    // maze.forEach((_, index) => {
+    //     maze[index][maze.length - 2] = 1;
+    // });
     maze[0][1] = 0;
 
-    const upDownWallnew = Array(rows).fill(1);
+    maze.forEach((el) => {
+        el.push(1);
+    });
+    const upDownWallnew = Array(rows + 1).fill(1);
     maze.push(upDownWallnew);
     maze.unshift(upDownWallnew);
-
-    maze[rows + 1][cols - 2] = 0;
-    maze.forEach((_, index) => {
-        maze[index][maze.length - 2] = 1;
-    });
+    maze[maze.length - 2][maze.length - 4] = 0;
+    maze[maze.length - 1][maze.length - 4] = 0;
 
     return maze;
 };

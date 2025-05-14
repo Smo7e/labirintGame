@@ -1,0 +1,104 @@
+.leaderboard-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around; /* Распределяем таблицы по ширине контейнера */
+    gap: 20px; /* Отступы между таблицами */
+    padding: 20px;
+    background: linear-gradient(90deg, #d47125, #bb306e, #dd2a1d);
+    background-image: url("../../assets/strashno.jpg");
+}
+
+.leaderboard {
+    width: calc(33.33% - 20px); /* Каждая таблица занимает треть контейнера минус отступы */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Важно для обрезки контента при маленьких экранах */
+}
+
+.leaderboard-title {
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-header-row {
+    background-color: #eee;
+    font-weight: bold;
+}
+
+.leaderboard-header-row th,
+.leaderboard-data-row td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.leaderboard-data-row {
+    color: white;
+}
+
+/* Медиа запросы для адаптивности */
+@media (max-width: 992px) {
+    /* Для экранов меньше 992px (планшеты) */
+    .leaderboard {
+        width: calc(50% - 20px); /* Каждая таблица занимает половину контейнера */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Для экранов меньше 768px (мобильные) */
+    .leaderboard-container {
+        flex-direction: column; /* Таблицы выстраиваются в столбец */
+    }
+
+    .leaderboard {
+        width: 100%; /* Каждая таблица занимает всю ширину контейнера */
+    }
+}
+
+/* Дополнительные стили для мобильных устройств (опционально) */
+@media (max-width: 576px) {
+    .leaderboard-header-row th,
+    .leaderboard-data-row td {
+        font-size: 14px; /* Уменьшаем размер шрифта */
+        padding: 6px;
+    }
+
+    /* Если колонки не помещаются, можно их скрывать: */
+    /*
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) {
+      display: none;
+    }
+    */
+
+    /* Или использовать горизонтальную прокрутку: */
+    .leaderboard-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap; /* Предотвращает перенос строк */
+    }
+
+    .leaderboard-table tr {
+        display: table-row; /* Возвращаем отображение строки по умолчанию */
+    }
+}
+.leaderboard-go-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50;
+    height: 100;
+    text-align: center;
+    justify-content: center;
+    background-color: #68f000;
+    border-radius: 10px;
+    color: black;
+}

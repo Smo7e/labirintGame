@@ -1,7 +1,10 @@
 #root {
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     text-align: center;
+    min-width: 100%;
+    min-height: 100%;
+    position: absolute;
 }
 
 .logo {
@@ -38,4 +41,111 @@
 
 .read-the-docs {
     color: #888;
+}
+.main {
+    background: linear-gradient(90deg, #d47125, #bb306e, #dd2a1d);
+    background-image: url("./assets/strashno.jpg");
+}
+.scary-button {
+    /* Базовый стиль для всех кнопок */
+    font-family: "Arial", sans-serif; /* Выберите подходящий шрифт */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out; /* Плавные переходы */
+    outline: none; /* Убираем обводку при фокусе */
+    position: relative; /* Для позиционирования псевдоэлементов */
+    overflow: hidden; /* Скрываем элементы, выходящие за границы */
+
+    /* Страшный, мрачный стиль */
+    background-color: #222; /* Темно-серый фон */
+    color: #aaa; /* Светло-серый текст */
+    border: 1px solid #444; /* Темная граница */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Тень */
+
+    /* Эффект трещин */
+    &::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        background-image: url("./assets/tresh.jpg"); /* Замените на путь к текстуре трещин */
+        opacity: 0.3; /* Небольшая прозрачность для эффекта */
+        pointer-events: none; /* Чтобы не мешать кликам */
+        z-index: 1;
+    }
+
+    /* Эффект затенения краев */
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            ellipse at center,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.5) 100%
+        ); /* Радиальный градиент от прозрачного к темному */
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    &:hover {
+        background-color: #111; /* Еще более темный фон при наведении */
+        color: #fff; /* Белый текст при наведении */
+        border-color: #666;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+
+        &::before {
+            opacity: 0.5; /* Более заметные трещины при наведении */
+        }
+    }
+
+    &:active {
+        background-color: #000; /* Черный фон при нажатии */
+        color: #ddd;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Анимация для "оживляжа" */
+    @keyframes flicker {
+        0% {
+            opacity: 0.4;
+        }
+        2% {
+            opacity: 0.7;
+        }
+        4% {
+            opacity: 0.4;
+        }
+        6% {
+            opacity: 1;
+        }
+        8% {
+            opacity: 0.7;
+        }
+        70% {
+            opacity: 0.7;
+        }
+        72% {
+            opacity: 0.2;
+        }
+        77% {
+            opacity: 0.9;
+        }
+        100% {
+            opacity: 0.4;
+        }
+    }
+
+    &::before {
+        animation: flicker 2s infinite;
+    }
 }
